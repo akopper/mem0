@@ -51,6 +51,31 @@ MEMGRAPH_PASSWORD = os.environ.get("MEMGRAPH_PASSWORD", "mem0graph")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 HISTORY_DB_PATH = os.environ.get("HISTORY_DB_PATH", "/app/history/history.db")
 
+LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "ollama")
+LLM_MODEL = os.environ.get("LLM_MODEL", "llama3.2:1b")
+LLM_API_KEY = os.environ.get("LLM_API_KEY")
+LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "http://localhost:11434")
+EMBEDDER_PROVIDER = os.environ.get("EMBEDDER_PROVIDER", "ollama")
+EMBEDDER_MODEL = os.environ.get("EMBEDDER_MODEL", "nomic-embed-text:latest")
+EMBEDDER_API_KEY = os.environ.get("EMBEDDER_API_KEY")
+EMBEDDER_BASE_URL = os.environ.get("EMBEDDER_BASE_URL", "http://localhost:11434")
+
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+
+# Build LLM config dynamically
+llm_config: Dict[str, Any] = {"provider": LLM_PROVIDER, "config": {}}
+if LLM_PROVIDER == "openai":
+    llm_config["config"] = {"api_key": LLM_API_KEY, "temperature": 0.2, "model": LLM_MODEL}
+elif LLM_PROVIDER == "ollama":
+    llm_config["config"] = {"model": LLM_MODEL, "ollama_base_url": LLM_BASE_URL, "temperature": 0.2}
+
+# Build embedder config dynamically  
+embedder_config: Dict[str, Any] = {"provider": EMBEDDER_PROVIDER, "config": {}}
+if EMBEDDER_PROVIDER == "openai":
+    embedder_config["config"] = {"api_key": EMBEDDER_API_KEY or LLM_API_KEY, "model": EMBEDDER_MODEL}
+elif EMBEDDER_PROVIDER == "ollama":
+    embedder_config["config"] = {"model": EMBEDDER_MODEL, "ollama_base_url": EMBEDDER_BASE_URL}
+
 DEFAULT_CONFIG = {
     "version": "v1.1",
     "vector_store": {
@@ -68,8 +93,8 @@ DEFAULT_CONFIG = {
         "provider": "neo4j",
         "config": {"url": NEO4J_URI, "username": NEO4J_USERNAME, "password": NEO4J_PASSWORD},
     },
-    "llm": {"provider": "openai", "config": {"api_key": OPENAI_API_KEY, "temperature": 0.2, "model": "gpt-4.1-nano-2025-04-14"}},
-    "embedder": {"provider": "openai", "config": {"api_key": OPENAI_API_KEY, "model": "text-embedding-3-small"}},
+    "llm": llm_config,
+    "embedder": embedder_config,
     "history_db_path": HISTORY_DB_PATH,
 }
 
