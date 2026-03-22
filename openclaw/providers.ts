@@ -294,6 +294,93 @@ class OSSProvider implements Mem0Provider {
 }
 
 // ============================================================================
+// OSS HTTP Provider (REST API Client for self-hosted Mem0 server)
+// ============================================================================
+
+class OSSHttpProvider implements Mem0Provider {
+  private baseUrl: string;
+  private apiKey: string;
+
+  constructor(apiKey: string, host?: string) {
+    this.baseUrl = host?.replace(/\/$/, '') ?? 'http://localhost:8000';
+    this.apiKey = apiKey;
+  }
+
+  private get headers(): Record<string, string> {
+    return {
+      'Content-Type': 'application/json',
+      'X-API-Key': this.apiKey,
+    };
+  }
+
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+    const url = `${this.baseUrl}${path}`;
+    const options: RequestInit = {
+      method,
+      headers: this.headers,
+    };
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+    
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      const text = await response.text().catch(() => 'Unknown error');
+      throw new Error(`HTTP ${response.status}: ${text}`);
+    }
+    return response.json() as Promise<T>;
+  }
+
+  async add(
+    messages: Array<{ role: string; content: string }>,
+    options: AddOptions,
+  ): Promise<AddResult> {
+    const body = {
+      messages,
+      user_id: options.user_id,
+      run_id: options.run_id,
+      agent_id: options.agent_id,
+      metadata: options.metadata,
+    };
+    const result = await this.request<unknown>('POST', '/memories', body);
+    return normalizeAddResult(result);
+  }
+
+  async search(query: string, options: SearchOptions): Promise<MemoryItem[]> {
+    const body: Record<string, unknown> = {
+      query,
+      user_id: options.user_id,
+      run_id: options.run_id,
+      agent_id: options.agent_id,
+      filters: options.filters,
+    };
+    const result = await this.request<unknown>('POST', '/search', body);
+    return normalizeSearchResults(result);
+  }
+
+  async get(memoryId: string): Promise<MemoryItem> {
+    const result = await this.request<unknown>('GET', `/memories/${encodeURIComponent(memoryId)}`);
+    return normalizeMemoryItem(result);
+  }
+
+  async getAll(options: ListOptions): Promise<MemoryItem[]> {
+    const params = new URLSearchParams();
+    if (options.user_id) params.set('user_id', options.user_id);
+    if (options.run_id) params.set('run_id', options.run_id);
+    if (options.page_size) params.set('page_size', String(options.page_size));
+    
+    const query = params.toString();
+    const path = `/memories${query ? `?${query}` : ''}`;
+    const result = await this.request<unknown>('GET', path);
+    return normalizeSearchResults(result);
+  }
+
+  async delete(memoryId: string): Promise<void> {
+    await this.request<unknown>('DELETE', `/memories/${encodeURIComponent(memoryId)}`);
+  }
+}
+
+// ============================================================================
 // Provider Factory
 // ============================================================================
 
@@ -305,6 +392,10 @@ export function createProvider(
     return new OSSProvider(cfg.oss, cfg.customPrompt, (p) =>
       api.resolvePath(p),
     );
+  }
+  
+  if (cfg.mode === "oss-http") {
+    return new OSSHttpProvider(cfg.apiKey!, cfg.host);
   }
 
   return new PlatformProvider(cfg.apiKey!, cfg.orgId, cfg.projectId, cfg.host);

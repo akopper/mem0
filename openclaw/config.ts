@@ -169,6 +169,7 @@ const ALLOWED_KEYS = [
   "searchThreshold",
   "topK",
   "oss",
+  "ossHttp", // New config section for oss-http mode
 ];
 
 function assertAllowedKeys(
@@ -189,15 +190,32 @@ export const mem0ConfigSchema = {
     const cfg = value as Record<string, unknown>;
     assertAllowedKeys(cfg, ALLOWED_KEYS, "openclaw-mem0 config");
 
-    // Accept both "open-source" and legacy "oss" as open-source mode; everything else is platform
-    const mode: Mem0Mode =
-      cfg.mode === "oss" || cfg.mode === "open-source" ? "open-source" : "platform";
+    // Accept both "open-source" and legacy "oss" as open-source mode; 
+    // "oss-http" is for HTTP REST API mode
+    // Everything else is platform
+    let mode: Mem0Mode;
+    if (cfg.mode === "oss" || cfg.mode === "open-source") {
+      mode = "open-source";
+    } else if (cfg.mode === "oss-http") {
+      mode = "oss-http";
+    } else {
+      mode = "platform";
+    }
 
     // Platform mode requires apiKey
     if (mode === "platform") {
       if (typeof cfg.apiKey !== "string" || !cfg.apiKey) {
         throw new Error(
-          "apiKey is required for platform mode (set mode: \"open-source\" for self-hosted)",
+          "apiKey is required for platform mode (set mode: \"open-source\" or \"oss-http\" for self-hosted)",
+        );
+      }
+    }
+
+    // oss-http mode requires apiKey (for X-API-Key header)
+    if (mode === "oss-http") {
+      if (typeof cfg.apiKey !== "string" || !cfg.apiKey) {
+        throw new Error(
+          "apiKey is required for oss-http mode (for X-API-Key header)",
         );
       }
     }

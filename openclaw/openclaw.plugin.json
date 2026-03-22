@@ -4,7 +4,7 @@
   "uiHints": {
     "mode": {
       "label": "Mode",
-      "help": "\"platform\" for Mem0 cloud, \"open-source\" for self-hosted"
+      "help": "\"platform\" for Mem0 cloud, \"open-source\" for local self-hosted, \"oss-http\" for REST API self-hosted"
     },
     "apiKey": {
       "label": "Mem0 API Key",
@@ -85,7 +85,8 @@
         "enum": [
           "platform",
           "open-source",
-          "oss"
+          "oss",
+          "oss-http"
         ]
       },
       "apiKey": {
@@ -93,7 +94,17 @@
       },
       "host": {
         "type": "string",
-        "description": "Custom Mem0 API host URL (for self-hosted deployments)"
+        "description": "Custom Mem0 API host URL (for self-hosted deployments using platform or oss-http mode)"
+      },
+      "ossHttp": {
+        "type": "object",
+        "description": "Configuration for oss-http mode (REST API client for self-hosted Mem0 server)",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "REST API base URL, e.g., https://mem0.knospi.com"
+          }
+        }
       },
       "userId": {
         "type": "string"

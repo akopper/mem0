@@ -2,7 +2,7 @@
  * Shared type definitions for the OpenClaw Mem0 plugin.
  */
 
-export type Mem0Mode = "platform" | "open-source";
+export type Mem0Mode = "platform" | "open-source" | "oss-http";
 
 export type Mem0Config = {
   mode: Mem0Mode;
@@ -24,6 +24,10 @@ export type Mem0Config = {
     historyDbPath?: string;
     disableHistory?: boolean;
   };
+  // OSS HTTP-specific (for oss-http mode)
+  ossHttp?: {
+    host?: string; // REST API base URL, e.g., "https://mem0.knospi.com"
+  };
   // Shared
   userId: string;
   autoCapture: boolean;
@@ -34,7 +38,9 @@ export type Mem0Config = {
 
 export interface AddOptions {
   user_id: string;
+  agent_id?: string;
   run_id?: string;
+  metadata?: Record<string, unknown>;
   custom_instructions?: string;
   custom_categories?: Array<Record<string, string>>;
   enable_graph?: boolean;
@@ -44,12 +50,14 @@ export interface AddOptions {
 
 export interface SearchOptions {
   user_id: string;
+  agent_id?: string;
   run_id?: string;
   top_k?: number;
   threshold?: number;
   limit?: number;
   keyword_search?: boolean;
   reranking?: boolean;
+  filters?: Record<string, unknown>;
   source?: string;
 }
 
