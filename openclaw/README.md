@@ -226,6 +226,8 @@ Works with zero extra config. The `oss` block lets you swap out any component:
 | `oss.embedder.config` | `object` | — | Provider config: `apiKey`, `model`, `baseURL` |
 | `oss.vectorStore.provider` | `string` | `"memory"` | Vector store (`"memory"`, `"qdrant"`, `"chroma"`, etc.) |
 | `oss.vectorStore.config` | `object` | — | Provider config: `host`, `port`, `collectionName`, `dimension` |
+| `oss.graphStore.provider` | `string` | `"memory"` | Graph store (`"memory"`, `"neo4j"`, etc.) |
+| `oss.graphStore.config` | `object` | — | Provider config: `url`, `username`, `password` |
 | `oss.llm.provider` | `string` | `"openai"` | LLM provider (`"openai"`, `"anthropic"`, `"ollama"`, `"lmstudio"`, etc.) |
 | `oss.llm.config` | `object` | — | Provider config: `apiKey`, `model`, `baseURL`, `temperature` |
 | `oss.historyDbPath` | `string` | — | SQLite path for memory edit history |
