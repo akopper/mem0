@@ -111,6 +111,21 @@ Get an API key from [app.mem0.ai](https://app.mem0.ai), then add to your `opencl
 }
 ```
 
+#### Self-hosted Mem0 Platform
+
+If you're running your own Mem0 Platform instance, specify a custom `host`:
+
+```json5
+"openclaw-mem0": {
+  "enabled": true,
+  "config": {
+    "apiKey": "your-admin-api-key",
+    "host": "https://mem0.yourdomain.com",  // custom Mem0 Platform URL
+    "userId": "alice"
+  }
+}
+```
+
 ### Open-Source (Self-hosted)
 
 No Mem0 key needed. Requires `OPENAI_API_KEY` for default embeddings/LLM.
@@ -193,6 +208,7 @@ openclaw mem0 stats --agent researcher
 | Key | Type | Default | |
 |-----|------|---------|---|
 | `apiKey` | `string` | — | **Required.** Mem0 API key (supports `${MEM0_API_KEY}`) |
+| `host` | `string` | `https://api.mem0.ai` | **Optional.** Custom Mem0 Platform URL for self-hosted deployments |
 | `orgId` | `string` | — | Organization ID |
 | `projectId` | `string` | — | Project ID |
 | `enableGraph` | `boolean` | `false` | Entity graph for relationships |
