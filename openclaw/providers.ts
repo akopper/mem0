@@ -194,7 +194,9 @@ class OSSProvider implements Mem0Provider {
 
     if (this.ossConfig?.embedder) config.embedder = this.ossConfig.embedder;
     if (this.ossConfig?.vectorStore)
-      config.vectorStore = this.ossConfig.vectorStore;
+      config.vector_store = this.ossConfig.vectorStore;
+    if (this.ossConfig?.graphStore)
+      config.graph_store = this.ossConfig.graphStore;
     if (this.ossConfig?.llm) config.llm = this.ossConfig.llm;
 
     if (this.ossConfig?.historyDbPath) {
